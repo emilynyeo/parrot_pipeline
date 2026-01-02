@@ -1,4 +1,4 @@
-source("code/genus_process.R")
+source("code/01_data_prep/genus_process.R")
 library(purrr)
 library(broom)
 library(ggtext)

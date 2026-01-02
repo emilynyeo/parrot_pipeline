@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-source("code/genus_process.R")
+source("code/01_data_prep/genus_process.R")
 library(mikropml)
 library(tidyverse)
 
