@@ -1,0 +1,23 @@
+{
+  "files.associations": {
+    "*.R": "r",
+    "*.r": "r",
+    "*.Rproj": "r",
+    "*.Rmd": "rmd",
+    "*.rmd": "rmd"
+  },
+  "r.rterm.mac": "/usr/local/bin/R",
+  "r.rpath.mac": "/usr/local/bin/R",
+  "r.alwaysUseActiveTerminal": true,
+  "r.bracketedPaste": true,
+  "r.lsp.path": "",
+  "r.lsp.args": [],
+  "r.lsp.use_stdio": true,
+  "r.lsp.diagnostics": true,
+  "[r]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": false,
+    "editor.wordBasedSuggestions": "off"
+  }
+}
