@@ -10,4 +10,5 @@
 #SBATCH --partition=standard
 #SBATCH --output=%x.o%A_%a
 
-make -j 16 processed_data/l2_genus_pooled_performance.tsv
+# Example: Run miseq models (can change to nanopore or specific model types)
+make -j 16 processed_data/l2_genus_miseq_performance.tsv

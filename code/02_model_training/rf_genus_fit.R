@@ -1,7 +1,7 @@
 feature_select <- function(x){
 
   x %>%
-    select(group, taxonomy, rel_abund, fit_result, srn)
+    select(samples, taxonomy, rel_abund, fit_result, captive_wild)
 
 }
 

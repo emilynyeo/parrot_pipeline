@@ -8,23 +8,33 @@ args <- commandArgs(trailingOnly = TRUE)
 output_file <- args[1]
 seed <- as.numeric(str_replace(output_file, ".*_(\\d*)\\.Rds", "\\1"))
 feature_script <- args[2]
+dataset_name <- args[3]  # "miseq" or "nanopore"
 
 source(feature_script)
 
-srn_data <- composite %>%
+# Select the appropriate dataset
+composite_data <- if(dataset_name == "miseq") {
+  composite_miseq
+} else if(dataset_name == "nanopore") {
+  composite_nanopore
+} else {
+  stop("dataset_name must be 'miseq' or 'nanopore'")
+}
+
+captive_wild_data <- composite_data %>%
+  select(samples, taxonomy, rel_abund, captive_wild) %>%
   feature_select() %>%
   pivot_wider(names_from=taxonomy, values_from = rel_abund) %>%
-  select(-group) %>%
-  mutate(srn = if_else(srn, "srn", "healthy")) %>%
-  select(srn, everything())
+  select(-samples) %>%
+  select(captive_wild, everything())
 
-srn_preprocess <- preprocess_data(srn_data,
-                                  outcome_colname = "srn")$dat_transformed
+# remove correlated and low variance vars 
+captive_wild_preprocess <- preprocess_data(captive_wild_data,
+                                        outcome_colname = "captive_wild")$dat_transformed
 
-
-model <- run_ml(srn_preprocess,
+model <- run_ml(captive_wild_preprocess,
        method=approach,
-       outcome_colname = "srn",
+       outcome_colname = "captive_wild",
        kfold = 5,
        cv_times = 100,
        training_frac = 0.8,

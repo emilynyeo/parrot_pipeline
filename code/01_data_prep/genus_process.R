@@ -4,10 +4,13 @@ library(ggtext)
 
 set.seed(19760620)
 
+cat("[genus_process.R] Starting data preparation...\n")
+
 data_dir <- "/Users/emily/projects/research/parrot_project/MelissaAnalysis"
 output_dir <- "/Users/emily/projects/research/parrot/mikropml_demo/processed_data/"
 
 # taxonomy table 
+cat("[genus_process.R] Step 1/6: Loading and processing taxonomy data...\n")
 taxonomy <- read.csv(file.path(data_dir, "00_sequence_data/JVB3218_16S/JVB3218-16S-esv-data.csv")) %>% 
   rename_all(tolower) %>% 
   # remove chloroplasts & mitochondria
@@ -22,8 +25,10 @@ taxonomy <- read.csv(file.path(data_dir, "00_sequence_data/JVB3218_16S/JVB3218-1
          taxonomy = str_replace_all(taxonomy, ";$", ""),
          taxonomy = str_replace_all(taxonomy, ".*;", "")) %>% 
   select(esvid, taxonomy)
+cat("  ✓ Taxonomy processed:", nrow(taxonomy), "ESVs\n")
 
 # NANOPORE AND MISEQ from original runs 
+cat("[genus_process.R] Step 2/6: Loading and processing read data (this may take a moment)...\n")
 shared <- read.csv(file.path(data_dir, "00_sequence_data/JVB3218_16S/JVB3218-16S-read-data.csv")) %>% 
   rename_with(~ gsub("^s0", "S0", .)) %>% 
   select(-starts_with(c("S082895", "S082806","TestId","sequence",
@@ -33,13 +38,17 @@ shared <- read.csv(file.path(data_dir, "00_sequence_data/JVB3218_16S/JVB3218-16S
   rename(percent_match = `X..match`) %>%
   pivot_longer(-ESVId, names_to = "samples", values_to = "count") %>% 
   rename_all(tolower)
+cat("  ✓ Read data processed:", nrow(shared), "rows\n")
 
 # meta
+cat("[genus_process.R] Step 3/6: Loading metadata files...\n")
 samples_16 <- read.csv(file.path(data_dir, "00_sequence_data/JVB3218_16S/JVB3218-samples.csv")) 
 meta1 <- read.csv(file.path(data_dir, "00_metadata/ParrotFecalSampleMetadata_SerialIDs_McKenzie.csv"))
 addmeta <- read.csv(file.path(data_dir, "00_metadata/additional_info_seizures.csv"))
-allBirdESVs <- read_csv(file.path(data_dir, "00_metadata/allBirdESVs.csv")) # remove birds 
+allBirdESVs <- read_csv(file.path(data_dir, "00_metadata/allBirdESVs.csv")) # remove birds
+cat("  ✓ Metadata files loaded\n") 
 
+cat("[genus_process.R] Step 4/6: Processing and joining metadata...\n")
 meta_file  <- left_join(meta1, addmeta) %>%
   unite(serial.prefix, serial.number, sep="", col="SampleId", remove=FALSE) %>%
   select(SampleId, everything()) %>% 
@@ -64,9 +73,10 @@ meta_file  <- left_join(meta1, addmeta) %>%
       Captive = "Captive",
       Wild_free = "Wild,_free_ranging",
       Wild_seized = "Wild,_seized_from_traffickers"))
-
+cat("  ✓ Metadata processed:", nrow(meta_file), "samples\n")
 
 # Combined miseq
+cat("[genus_process.R] Step 5/6: Creating composite_miseq dataset (joining and aggregating)...\n")
 composite_miseq <- inner_join(shared, taxonomy, by = "esvid") %>% 
   filter(str_detect(samples, "^S0") & str_detect(samples, "\\.1$")) %>% 
   mutate(samples = gsub("\\.[1]$", "", samples)) %>% 
@@ -84,10 +94,11 @@ composite_miseq <- inner_join(shared, taxonomy, by = "esvid") %>%
   ungroup() %>% 
   select(-count) %>%
   inner_join(., meta_file, by="samples")
-
+cat("  ✓ composite_miseq created:", nrow(composite_miseq), "rows\n")
 
   # Combined nano 
-composite_nano <- inner_join(shared, taxonomy, by = "esvid") %>% 
+cat("[genus_process.R] Step 6/6: Creating composite_nanopore dataset (joining and aggregating)...\n")
+composite_nanopore <- inner_join(shared, taxonomy, by = "esvid") %>% 
   filter(str_detect(samples, "^S0") & str_detect(samples, "\\.2$")) %>% 
   mutate(samples = gsub("\\.[2]$", "", samples)) %>% 
   filter(!esvid %in% allBirdESVs$ESVId) %>% # remove bird esvs
@@ -104,3 +115,9 @@ composite_nano <- inner_join(shared, taxonomy, by = "esvid") %>%
   ungroup() %>% 
   select(-count) %>%
   inner_join(., meta_file, by="samples")
+cat("  ✓ composite_nanopore created:", nrow(composite_nanopore), "rows\n")
+
+cat("[genus_process.R] Saving datasets to RDS files...\n")
+saveRDS(composite_miseq, file = file.path(output_dir, "composite_miseq.rds"))
+saveRDS(composite_nanopore, file = file.path(output_dir, "composite_nanopore.rds"))
+cat("[genus_process.R] ✓ Data preparation complete!\n\n")

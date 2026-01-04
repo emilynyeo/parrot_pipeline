@@ -6,24 +6,24 @@ library(furrr)
 #plan("multicore")  # doesnt work with windows or Rstudio
 plan("multisession")
 
-srn_genus_data <- composite %>%
-  select(group, taxonomy, rel_abund, srn) %>%
+# Use miseq dataset (can change to composite_nanopore if needed)
+captive_wild_genus_data <- composite_miseq %>%
+  select(samples, taxonomy, rel_abund, captive_wild) %>%
   pivot_wider(names_from=taxonomy, values_from = rel_abund) %>%
-  select(-group) %>%
-  mutate(srn = if_else(srn, "srn", "healthy")) %>%
-  select(srn, everything())
+  select(-samples) %>%
+  select(captive_wild, everything())
 
-srn_genus_preprocess <- preprocess_data(srn_genus_data,
-                                        outcome_colname = "srn")$dat_transformed
+captive_wild_genus_preprocess <- preprocess_data(captive_wild_genus_data,
+                                        outcome_colname = "captive_wild")$dat_transformed
 
 test_hp <- list(alpha = 0, 
                 lambda = c(0.1, 1, 2, 3, 4, 5, 10))
 
-get_srn_genus_results <- function(seed){
+get_captive_wild_genus_results <- function(seed){
   
-  run_ml(srn_genus_preprocess,
+  run_ml(captive_wild_genus_preprocess,
        method="glmnet",
-       outcome_colname = "srn",
+       outcome_colname = "captive_wild",
        kfold = 5,
        cv_times = 100,
        training_frac = 0.8,
@@ -35,7 +35,7 @@ get_srn_genus_results <- function(seed){
 
 library(tictoc)
 tic()
-iterative_run_ml_results <- future_map(1:100, get_srn_genus_results,
+iterative_run_ml_results <- future_map(1:100, get_captive_wild_genus_results,
                                        .options = furrr_options(seed=TRUE))
 toc()
 
