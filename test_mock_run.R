@@ -10,8 +10,8 @@ cat(paste(rep("=", 60), collapse=""), "\n\n")
 # Test parameters - modify these to test specific models/datasets
 # Options for TEST_MODELS: "l2_genus", "l2_genus_fit", "rf_genus", "rf_genus_fit"
 # Options for TEST_DATASETS: "miseq", "nanopore"
-TEST_MODELS <- c("rf_genus")  # Test only random forest can change to other models
-TEST_DATASETS <- c("miseq")   # Test only miseq dataset can change to nanopore 
+TEST_MODELS <- c("rf_genus_fit")  # Test the _fit variant to verify given_probiotic works
+TEST_DATASETS <- c("miseq")   # Test miseq dataset 
 SEED <- 1
 
 # Track results

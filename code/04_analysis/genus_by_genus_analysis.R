@@ -4,12 +4,13 @@ library(broom)
 library(ggtext)
 
 # Analyze miseq dataset (can change to composite_nanopore if needed)
+# Use Kruskal-Wallis test for multi-class comparison (captive_wild has 3 levels)
 sig_genera <- composite_miseq %>%
   nest(data = -taxonomy) %>%
-  mutate(test = map(.x=data, ~wilcox.test(rel_abund~captive_wild, data=.x) %>% tidy)) %>%
+  mutate(test = map(.x=data, ~kruskal.test(rel_abund~captive_wild, data=.x) %>% tidy)) %>%
   unnest(test) %>% 
   mutate(p.adjust = p.adjust(p.value, method="BH")) %>%
-  filter(p.adjust < 0.05) %>%
+  filter(p.adjust < 0.001) %>%
   select(taxonomy, p.adjust)
 
 
@@ -109,10 +110,10 @@ get_roc_data <- function(x, direction, outcome_var, positive_class = NULL){
 
 roc_data <- composite_miseq %>%
   inner_join(sig_genera, by="taxonomy") %>%
-  select(samples, taxonomy, rel_abund, fit_result, captive_wild) %>%
+  select(samples, taxonomy, rel_abund, given_probiotic, captive_wild) %>%
   pivot_wider(names_from=taxonomy, values_from=rel_abund) %>%
-  pivot_longer(cols=-c(samples, captive_wild), names_to="metric", values_to="score") %>%
-  # filter(metric == "fit_result") %>%
+  pivot_longer(cols=-c(samples, captive_wild, given_probiotic), names_to="metric", values_to="score") %>%
+  # filter(metric == "given_probiotic") %>%
   nest(data = -metric) %>%
   mutate(direction = if_else(metric == "Lachnospiraceae_unclassified",
                              "lessthan","greaterthan")) %>%

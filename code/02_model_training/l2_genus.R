@@ -8,4 +8,4 @@ feature_select <- function(x){
 approach <- "glmnet"
 
 hyperparameter <- list(alpha = 0,
-                       lambda = c(0.1, 1, 2, 3, 4, 5))
+                       lambda = c(0.1, 1, 2))

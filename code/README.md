@@ -13,9 +13,9 @@ This directory is organized by workflow phase to make it clear which scripts bel
 **Phase 2: Model Training**
 - `run_split.R` - Main wrapper script that runs model training with different seeds
 - `l2_genus.R` - Configuration for L2 regularized logistic regression (genus features only)
-- `l2_genus_fit.R` - Configuration for L2 regularized logistic regression (genus + fit_result)
+- `l2_genus_fit.R` - Configuration for L2 regularized logistic regression (genus + given_probiotic)
 - `rf_genus.R` - Configuration for Random Forest (genus features only)
-- `rf_genus_fit.R` - Configuration for Random Forest (genus + fit_result)
+- `rf_genus_fit.R` - Configuration for Random Forest (genus + given_probiotic)
 
 ### `03_model_combination/`
 **Phase 3: Model Combination**

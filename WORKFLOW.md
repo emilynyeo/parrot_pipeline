@@ -22,7 +22,7 @@ The following four model types are trained independently. Each runs 100 iteratio
    - Creates: `processed_data/l2_genus_1.Rds` through `l2_genus_100.Rds`
 
 3. **`code/02_model_training/run_split.R`** + **`code/02_model_training/l2_genus_fit.R`**
-   - Trains L2 regularized logistic regression with genus + fit_result features
+   - Trains L2 regularized logistic regression with genus + given_probiotic features
    - Creates: `processed_data/l2_genus_fit_1.Rds` through `l2_genus_fit_100.Rds`
 
 4. **`code/02_model_training/run_split.R`** + **`code/02_model_training/rf_genus.R`**
@@ -30,7 +30,7 @@ The following four model types are trained independently. Each runs 100 iteratio
    - Creates: `processed_data/rf_genus_1.Rds` through `rf_genus_100.Rds`
 
 5. **`code/02_model_training/run_split.R`** + **`code/02_model_training/rf_genus_fit.R`**
-   - Trains Random Forest with genus + fit_result features
+   - Trains Random Forest with genus + given_probiotic features
    - Creates: `processed_data/rf_genus_fit_1.Rds` through `rf_genus_fit_100.Rds`
 
 ### Phase 3: Model Combination
