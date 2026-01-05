@@ -40,49 +40,29 @@ captive_wild_preprocess <- preprocess_data(
 )$dat_transformed
 
 # 7. Train model
-
-# Ensure the outcome is a clean factor with expected labels
 captive_wild_preprocess$captive_wild <- factor(
   captive_wild_preprocess$captive_wild,
-  levels = c("Captive", "Wild_free", "Wild_seized")
-)
+  levels = c("Captive", "Wild_free", "Wild_seized"))
 
-# Build groups vector as character (not factor), and trim any whitespace
-groups_vec <- trimws(as.character(captive_wild_preprocess$captive_wild))
+cap_group <- c(captive_wild_preprocess$captive_wild)
 
-# Create stratified train indices: each class present in both train and test
 set.seed(1)
-train_inds <- mikropml::create_grouped_data_partition(
-  groups = groups_vec,
+model <- run_ml(
+  dataset = captive_wild_preprocess,
+  method = approach,                 # e.g., "glmnet", "rf", ...
+  outcome_colname = "captive_wild",
+  kfold = 5,
+  cv_times = 15,
+  training_frac = 0.75,              # 75% of each group goes to train
+  groups = cap_group,
   group_partitions = list(
     train = c("Captive", "Wild_free", "Wild_seized"),
     test  = c("Captive", "Wild_free", "Wild_seized")
   ),
-  training_frac = 0.75
-)
-
-# Sanity check: all classes in both splits
-table(groups_vec[train_inds])
-table(groups_vec[-train_inds])
-
-# Train using explicit indices (note: pass indices via training_frac)
-model <- run_ml(
-  dataset = captive_wild_preprocess,
-  method = approach,
-  outcome_colname = "captive_wild",
-  training_frac = train_inds,     # <- indices, not a fraction
-  kfold = 5,
-  cv_times = 15,
-  # Optionally provide groups to keep them together during CV if needed
-  groups = groups_vec,
   find_feature_importance = TRUE,
   hyperparameters = hyperparameter,
   seed = 1
 )
-
-# Confirm test distribution
-table(model$test_data$captive_wild)
-
 
 # Sanity check: confirm all classes present in test split
 table(model$test_data$captive_wild)
